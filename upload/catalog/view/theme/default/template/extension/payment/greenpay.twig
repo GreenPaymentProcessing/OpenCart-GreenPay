@@ -1,0 +1,67 @@
+<div>
+    <h3 class="lemonway-method-title">
+        {{ text_card }}
+    </h3>
+	<form action="{{ link_checkout }}" class="form-horizontal" method="POST">
+		<div>
+			<div class="form-group required">
+				<label for="input-shipping-firstname" class="col-sm-2 control-label">Account Number</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control account_number req" name="greenpay_account_number" value="" />
+					<div class="text-danger req_acc" style='display:none'>{{ error_field_empty }}</div>
+				</div>
+			</div>
+			<div class="form-group required">
+				<label for="input-shipping-firstname" class="col-sm-2 control-label">Routing Number</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control routing_number req" name="greenpay_routing_number" value="" />
+					<div class="text-danger req_routing" style='display:none'>{{ error_field_empty }}</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="buttons">
+			<div class="pull-right">
+				<button type="submit" data-toggle="tooltip" class="btn btn-primary button_continue" data-loading-text="{{ text_loading }}">
+					{{ button_continue }}
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+<script>
+    $(function()
+    {
+        // Validation
+        $(".button_continue").click(function()
+        {
+		var sts = true;
+			$('.req').each(function () {
+				if ($(this).val() == ''){
+					$(this).css('border-color', 'red');
+					sts = false ;
+				}
+			});
+			return sts;
+            /*var account_number = $('.account_number').val();
+            var routing_number = $('.routing_number').val();
+			if(account_number == '' && routing_number == ''){
+				$('.account_number').css("border-color","rgb(169, 68, 66)");
+				$('.req_acc').css("display","block");
+				$('.routing_number').css("border-color","rgb(169, 68, 66)");
+				$('.req_routing').css("display","block")
+				return false;
+			}
+			if(account_number == ''){
+				$('.account_number').css("border-color","rgb(169, 68, 66)");
+				$('.req_acc').css("display","block");
+				return false;
+			}
+			if(routing_number == ''){
+				$('.routing_number').css("border-color","rgb(169, 68, 66)");
+				$('.req_routing').css("display","block");
+				return false;
+			}*/
+        });
+    });
+</script>
