@@ -2,59 +2,74 @@
     <!-- Account config panel -->
     <div class="panel">
         <div class="panel-heading">
-            <i class="fa fa-user"></i> {{ text_account_config }}
+            <i class="fa fa-cog"></i> {{ text_account_config }}
         </div>
-
         <div class="form-wrapper">
-		<div class="form-group">
-            <label class="control-label col-lg-1">
-                {{ text_enabled }}
-            </label>
-
-            <div class="col-lg-11">
-                <input type="checkbox" name="greenpay_status" id="greenpay_status" value="1" {{ greenpay_status ? 'checked' : '' }} />
+            <div class="form-group row">
+                <label class="control-label col-sm-2">{{ text_enabled }}</label>
+                <div class="col-sm-10" style="padding-top:9px;">
+                    <input type="checkbox" name="greenpay_status" id="greenpay_status" value="1" {{ greenpay_status ? 'checked' : '' }} />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 control-label">{{ payment_mode }}</label>
+                <div class="col-sm-10">
+                    <select name="greenpay_payment_mode" id="greenpay_payment_mode" class="form-control">
+                        <option value="https://cpsandbox.com/OpenCart.asmx"
+                            {% if greenpay_payment_mode == 'https://cpsandbox.com/OpenCart.asmx' %} 
+                                selected
+                            {% endif %}>{{ text_extension_sandbox }}</option>
+                        <option value="https://greenbyphone.com/OpenCart.asmx"
+                            {% if greenpay_payment_mode == 'https://greenbyphone.com/OpenCart.asmx' %} 
+                                selected
+                            {% endif %}>{{ text_extension_live }}</option>
+                    </select>
+                </div>
             </div>
         </div>
-		<div class="form-group">
-			<label class="col-lg-1 control-label">{{ payment_mode }}</label>
-			<div class="col-lg-11">
-				<select name="greenpay_payment_mode" id="greenpay_payment_mode" class="form-control">
-					<option value="https://cpsandbox.com/OpenCart.asmx" {% if greenpay_payment_mode == 'https://cpsandbox.com/OpenCart.asmx' %} selected {% endif %}>{{ text_extension_sandbox }}</option>
-					<option value="https://greenbyphone.com/OpenCart.asmx" {% if greenpay_payment_mode == 'https://greenbyphone.com/OpenCart.asmx' %} selected {% endif %}>{{ text_extension_live }}</option>
-				</select>
-			</div>
-		</div>
-
-			<div class="form-group">
-                <label class="control-label col-lg-1">
-                    {{ text_login }} *
-                </label>
-
-                <div class="col-lg-11">
+        <div class="panel-heading">
+            <i class='fa fa-cloud-upload'></i> {{ text_green_api }}
+        </div>
+        <div class="form-wrapper">
+            <div class="form-group row">
+                <label class="control-label col-sm-2">{{ text_login }}*</label>
+                <div class="col-sm-10">
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-user "></i>
                         </span>
-                        <input type="text" name="greenpay_client_id" value="{{ greenpay_client_id }}" class="form-control" required />
+                        <input type="text" name="greenpay_client_id" value="{{ greenpay_client_id }}"
+                            class="form-control" required />
                     </div>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label class="control-label col-lg-1">
-                    {{ text_password }} *
-                </label>
-
-                <div class="col-lg-11">
+            <div class="form-group row">
+                <label class="control-label col-sm-2">{{ text_password }}*</label>
+                <div class="col-sm-10">
                     <div class="input-group fixed-width-lg">
                         <span class="input-group-addon">
                             <i class="fa fa-lock"></i>
                         </span>
-                        <input type="password" name="greenpay_api_password" class="form-control" {{ (greenpay_api_password is empty) ? "required" : "placeholder='#{text_masked}'" }} />
+                        <input type="text" name="greenpay_api_password" class="form-control" value="{{ greenpay_api_password }}"/>
                     </div>
                 </div>
             </div>
-
+        </div>
+        <div class="panel-heading">
+            <i class='fa fa-cloud-download'></i> {{ text_oc_api }}
+        </div>
+        <div class="form-wrapper">
+            <div class="form-group row">
+                <label class="control-label col-sm-2">{{ text_oc_label }}*</label>
+                <div class="col-sm-10">
+                    <div class="input-group fixed-width-lg">
+                        <span class="input-group-addon">
+                            <i class="fa fa-key"></i>
+                        </span>
+                        <input type="text" name="greenpay_oc_key" class="form-control" value="{{ greenpay_oc_key }}"/>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
