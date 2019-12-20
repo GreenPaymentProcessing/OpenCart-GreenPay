@@ -7,6 +7,7 @@ class ModelExtensionPaymentGreenPay extends Model
             `id` int(11) AUTO_INCREMENT,
             `order_id` int(11) NOT NULL,
             `customer_id` int(11) NOT NULL,
+            `eCommerceOrder_id` int(11) NOT NULL,
             `check_id` varchar(255) NOT NULL,
             `check_number` varchar(255) NOT NULL,
             PRIMARY KEY (`id`)

@@ -1,7 +1,64 @@
 # OpenCart-GreenPay
 GreenPay gateway plugin for OpenCart eCommerce system
 
+WARNING: This repository and plugin are currently under development and are not tested in production environments. Usage of this plugin is done at your own risk!
+
 ## Prerequisites
+1. Your server must have OpenCart version 3.x or greater installed. 
+2. Your server must have a domain name and be secured via SSL certificate. All requests made to our API must be done from HTTPS
+3. You must allow extensions to write to the API folder in OpenCart. 
+
+## Allow Extensions to Write to the API Folder in OpenCart
+Our extension adds custom API controllers so that our API can update the status of orders in your store whenever we receive a check payment, update its verification status, or process the check so that your store has the most up to date information about your payment as possible. In order to enable extensions to add to the OpenCart API, you will need to edit one of the OpenCart core files before beginning with the installation. 
+
+First, connect to your web server using your favorite FTP client and navigate to your OpenCart installation's root direction. From there, find the file at the following path: `<OpenCart Root>/admin/controller/marketplace/install.php`. Open that file in a text editor. Look for the following section of code: 
+
+```php
+// A list of allowed directories to be written to
+$allowed = array(
+    'admin/controller/extension/',
+    'admin/language/',
+    'admin/model/extension/',
+    'admin/view/image/',
+    'admin/view/javascript/',
+    'admin/view/stylesheet/',
+    'admin/view/template/extension/',
+    'catalog/controller/extension/',
+    'catalog/language/',
+    'catalog/model/extension/',
+    'catalog/view/javascript/',
+    'catalog/view/theme/',
+    'system/config/',
+    'system/library/',
+    'image/catalog/'
+);
+```
+
+This defines what sections OpenCart Extensions are allowed to write to. We need to add one so change that section to: 
+
+```php
+// A list of allowed directories to be written to
+$allowed = array(
+    'admin/controller/extension/',
+    'admin/language/',
+    'admin/model/extension/',
+    'admin/view/image/',
+    'admin/view/javascript/',
+    'admin/view/stylesheet/',
+    'admin/view/template/extension/',
+    'catalog/controller/api/',
+    'catalog/controller/extension/',
+    'catalog/language/',
+    'catalog/model/extension/',
+    'catalog/view/javascript/',
+    'catalog/view/theme/',
+    'system/config/',
+    'system/library/',
+    'image/catalog/'
+);
+```
+
+So note that we added `catalog/controller/api/` as a path in the middle there. Once you're done with that, save the changes to this file and, if you're editing via FTP make sure to upload the file back. If you're editing on the server directly through SSH then just save the file and the changes should take effect immediately and you can move onto the installation.
 
 ## Installation via FTP
 Clone or download this repository. Use your favorite FTP client to connect to your server and navigate to your OpenCart's root directory. From there, copy all the files inside the `upload` folder into that root directory. Do not copy the `upload` folder itself, just the folders and files inside it.

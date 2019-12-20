@@ -18,20 +18,30 @@
         {% endif %}
 
         {% if no_method %}
-        <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> {{ error_no_method }}
+        <div class="alert alert-warning alert-dismissible"><i class="fa fa-exclamation-triangle"></i> {{ error_no_method }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
         {% endif %}
 
         {% if greenpay_is_test_mode == 0 %}
-        <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> {{ error_test_mode }}
+        <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> {{ error_test_mode }}</div>
+        {% endif %}
+
+        {% if success %}
+        <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ error_success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
         {% endif %}
 
-        {% if success %}
-        <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ error_success }}
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {% if green_api_error %}
+        <div class="alert alert-danger">
+            <i class="fa fa-ban"></i> {{ error_api }}
+        </div>
+        {% endif %}
+
+        {% if oc_api_error %}
+        <div class="alert alert-danger">
+            <i class="fa fa-ban"></i> {{ error_api_oc }}
         </div>
         {% endif %}
 
@@ -40,20 +50,11 @@
         {% endif %}
         <!-- End alerts -->
 
-        <div class="panel panel-default pooja">
+        <div class="panel panel-default">
             <div class="panel-body">
-                <form id="form-lemonway" class="form-horizontal" method="post" enctype="multipart/form-data">
-                    <div role="tabpanel">
-                        <!-- Nav tabs -->
-                        <ul class="nav nav-tabs" role="tablist" data-tabs="tabs">
-                            <li class="active"><a id="config_tab" href="#config" role="tab" data-toggle="tab"><i class="fa fa-cog"></i> {{ tab_config }}</a></li>
-                        </ul>
-
-                        <!-- Tab panes -->
-                        <div class="tab-content">
-                            <!--div class="tab-pane fade in active" id="aboutus">{{ about_us }}</div-->
-                            <div class="tab-pane fade in active" id="config">{{ config }}</div>
-                        </div>
+                <form id="form-greenpay" class="form-horizontal" method="post" enctype="multipart/form-data">
+                    <div>
+                        {{ config }}
                     </div>
                 </form>
                 <div class="text-right">
@@ -65,22 +66,3 @@
 </div>
 <!-- </div> -->
 {{ footer }}
-
-<script>
-    $(function()
-    {
-        // Show config tab
-        $("#config_link").click(function(e)
-        {
-            e.preventDefault();
-            $("#config_tab").tab('show');
-        });
-
-        // Show cc tab
-        $("#cc_link").click(function(e)
-        {
-            e.preventDefault();
-            $("#cc_tab").tab('show');
-        });
-    });
-</script>
