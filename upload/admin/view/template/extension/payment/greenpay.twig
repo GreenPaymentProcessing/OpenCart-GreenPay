@@ -23,13 +23,19 @@
         </div>
         {% endif %}
 
-        {% if greenpay_is_test_mode == 0 %}
+        {% if greenpay_payment_mode == 0 %}
         <div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> {{ error_test_mode }}</div>
         {% endif %}
 
         {% if success %}
         <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ error_success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {% endif %}
+
+        {% if failedSave %}
+        <div class="alert alert-danger">
+            <i class="fa fa-ban"></i> {{ error_failed_save }}
         </div>
         {% endif %}
 
@@ -46,7 +52,7 @@
         {% endif %}
 
         {% if error_form_req %}
-        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_form_reqired }}</div>
+        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_form_required }}</div>
         {% endif %}
         <!-- End alerts -->
 

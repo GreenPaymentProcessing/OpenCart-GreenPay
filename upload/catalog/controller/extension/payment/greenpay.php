@@ -1,5 +1,7 @@
 <?php
 
+define("GREENPAY_ENDPOINT", "https://cpsandbox.com/OpenCart.asmx/");
+
 class ControllerExtensionPaymentGreenPay extends Controller
 {
     // Constants
@@ -72,13 +74,21 @@ class ControllerExtensionPaymentGreenPay extends Controller
     {
         $greenConfig = array();
         $greenConfig['greenpay_client_id'] = $this->config->get($this->prefix() . 'greenpay_client_id');
+        $greenConfig['greenpay_store_id'] = $this->config->get($this->prefix() . 'greenpay_store_id');
         $greenConfig['greenpay_api_password'] = $this->config->get($this->prefix() . 'greenpay_api_password');
+        $greenConfig['greenpay_oc_username'] = $this->config->get($this->prefix() . 'greenpay_oc_username');
         $greenConfig['greenpay_oc_key'] = $this->config->get($this->prefix() . 'greenpay_oc_key');
+        $greenConfig['greenpay_domain'] = $this->config->get($this->prefix() . 'greenpay_domain');
+        $greenConfig['greenpay_payment_mode'] = $this->config->get($this->prefix() . 'greenpay_payment_mode');
 
-        if ($this->config->get($this->prefix() . 'greenpay_is_test_mode')) {
-            $greenConfig['greenpay_payment_mode'] = "https://cpsandbox.com/OpenCart.asmx";
-        } else {
-            $greenConfig['greenpay_payment_mode'] = "https://greenbyphone.com/OpenCart.asmx";
+        if(strlen($this->config->get($this->prefix() . 'greenpay_domain')) == 0){
+            $site_url = $this->config->get("site_ssl");
+            $site_url_parts = explode("/", $site_url);
+            //Site comes with /admin/ attached at the end and we only want the base OpenCart domain so we have to pop twice
+            array_pop($site_url_parts);
+            array_pop($site_url_parts);
+            $site_url = implode("/", $site_url_parts);
+            $greenConfig['greenpay_domain'] = $site_url;
         }
 
         return $greenConfig;
@@ -99,14 +109,6 @@ class ControllerExtensionPaymentGreenPay extends Controller
 
         $data['text_card'] = $this->language->get('text_card');
         $data['link_checkout'] = $this->url->link('extension/payment/greenpay/checkout', '', true);
-
-        // // If card saved
-        // $data['text_use_card'] = $this->language->get('text_use_card');
-        // $data['text_save_new_card'] = $this->language->get('text_save_new_card');
-        // $data['text_not_use_card'] = $this->language->get('text_not_use_card');
-        // // If no card saved
-        // $data['text_save_card'] = $this->language->get('text_save_card');
-
         $data['button_continue'] = $this->language->get('button_continue');
         $data['text_loading'] = $this->language->get('text_loading');
 
@@ -118,15 +120,18 @@ class ControllerExtensionPaymentGreenPay extends Controller
      */
     public function checkout()
     {
+        error_log("Starting the checkout process...");
         if ((!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))) {
             //No products & no vouchers or the items aren't in stock and we require stock, redirect to the cart
-            $this->response->redirect($this->url->link('checkout/cart', '', true));
+            error_log("No products, no vouches, or the items aren't in stock...");
+            $this->response->redirect($this->url->link('checkout/checkout', '', true));
         }
 
         if (!isset($this->request->post['greenpay_account_number']) || !isset($this->request->post['greenpay_routing_number'])) {
             // If either the account or routing numbers are unset, then we need to redirect back to the cart and show errors
+            error_log("Routing or account number are missing...");
             $this->session->data['error'] = $this->language->get('error_both_required');
-            $this->response->redirect($this->url->link('checkout/cart', '', true));
+            $this->response->redirect($this->url->link('checkout/checkout', '', true));
         }
 
         $account_number = trim($this->request->post['greenpay_account_number']);
@@ -134,19 +139,22 @@ class ControllerExtensionPaymentGreenPay extends Controller
         
         if(strlen($account_number) == 0){
             //Don't just check for existence of keys, but trim them and make sure they have values
+            error_log("account number empty..");
             $this->session->data['error'] = $this->language->get("error_account_empty");
-            $this->response->redirect($this->url->link("checkout/cart", "", true));
+            $this->response->redirect($this->url->link("checkout/checkout", "", true));
         }
 
         if(strlen($routing_number) == 0){
+            error_log("routing number empty..");
             $this->session->data['error'] = $this->language->get("error_routing_empty");
-            $this->response->redirect($this->url->link("checkout/cart", "", true));
+            $this->response->redirect($this->url->link("checkout/checkout", "", true));
         }
 
         if(!is_numeric($account_number) || !is_numeric($routing_number)){
             //Additionally, check for whether or not both look like numbers
+            error_log("non numeric routing or account..");
             $this->session->data['error'] = $this->language->get("error_routing_empty");
-            $this->response->redirect($this->url->link("checkout/cart", "", true));
+            $this->response->redirect($this->url->link("checkout/checkout", "", true));
         } 
 
         if(!is_numeric($routing_number)){
@@ -154,8 +162,9 @@ class ControllerExtensionPaymentGreenPay extends Controller
             $exploded = explode("-", $routing_number);
             if(count($exploded) <> 2 || !is_numeric($exploded[0]) || !is_numeric($exploded[1])){
                 //It's not canadian format or one of the parts is not numeric.
+                error_log("routing number non numeric and not canadian format..");
                 $this->session->data['error'] = $this->language->get("error_routing_invalid");
-                $this->response->redirect($this->url->link("checkout/cart", "", true));
+                $this->response->redirect($this->url->link("checkout/checkout", "", true));
             } 
         }
 
@@ -171,123 +180,101 @@ class ControllerExtensionPaymentGreenPay extends Controller
         $order_info = $this->model_checkout_order->getOrder($order_id);
 
         if (!$order_info) {
+            error_log("Order not found in the store?..");
             //We couldn't find the order in the store
             $this->session->data['error'] = $this->language->get('error_order_not_found');
-            $this->response->redirect($this->url->link('checkout/cart', '', true));
+            $this->response->redirect($this->url->link('checkout/checkout', '', true));
         }
 
-        
         $greenConfig = $this->getGreenmoneyConfig();
-
 		$link = $greenConfig['greenpay_payment_mode'].'/CartCheck';        
         $check = array(
             "Client_ID" => $greenConfig['greenpay_client_id'],
             "APIPassword" => $greenConfig['greenpay_api_password'],
-            "Name" => $order_info['firstname'].' '.$order_info['lastname'],
-            "EmailAddress" => $order_info['email'],
-            "Phone" => str_replace(['(', ')', '-',' '], null, trim($order_info['telephone'])),
-            "PhoneExtension" => "",
-            "Address1" => $order_info["payment_address_1"],
-            "Address2" => $order_info["payment_address_2"],
-            "City" => $order_info["payment_city"],
-            "State" => $order_info["payment_zone"],
-            "Zip" => $order_info["payment_postcode"],
-            "Country" => $order_info["payment_iso_code_2"],
+            "StoreID" => $greenConfig["greenpay_store_id"],
+            "OrderID" => $order_id,
             "RoutingNumber" => $routing_number,
-            "AccountNumber" => $account_number,
-            "Memo" => "",
-            "Amount" => $order_info["total"],
-            "Date" => date('m/d/Y', strtotime($order_info['date_added']))
+            "AccountNumber" => $account_number
         );
 
-		// Curl Hit to generate check
-		$ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $link);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $check);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        try {
-            $result = curl_exec($ch);
-            curl_close($ch);
-            $xml = @simplexml_load_string($result); //@ specifies to ignore warnings thrown by this attempt to load the XML into an object
-            $json = json_encode($xml);
-            $result_array = json_decode($json, TRUE);
-            $error_msg = "";
+        error_log("data about to be sent to the api..");
+        error_log(print_r($check, true));
 
-            //Insert check if generated
-            if( isset($result_array['Result']) && $result_array['Result']==0){
-                $data['order_id'] = $order_info['order_id'];
-                $data['customer_id'] = $order_info['customer_id'];
-                $data["eCommerceOrder_id"] = $result_array["ECommerceOrder_ID"];
-                $data['check_id'] = $result_array['Check_ID'];
-                $data['CheckNumber'] = $result_array['CheckNumber'];
+        $response = $this->postGreenAPI("OneTimeDraft", $check);
 
-                $this->model_extension_payment_greenpay->insertCheckData($data);
-                // Success => Order status 2 : Processing
-                $this->model_checkout_order->addOrderHistory($order_info['order_id'], 2);
+        error_log("raw response from the API..");        
+        error_log(print_r($response, true));
+        if($response == null || !($response instanceof SimpleXMLElement)){
+            //Error occurred
+            error_log("[GreenPay] Error occurred while attempting to call to create check. Raw response: " . print_r($response, true));
+            $this->session->data['error'] = "GreenPay Payment Error: " . $this->language->get('error_something_wrong');
+            $this->response->redirect($this->url->link('checkout/checkout', '', true));
+        } else {
+            //We've got the thing
+            if((string)$response->Result->Result == "0"){
+                //Success, check was made
+                $this->model_extension_payment_greenpay->insertCheckData(array(
+                    "order_id" => $order_info['order_id'],
+                    "customer_id" => $order_info['customer_id'],
+                    "eCommerceOrder_id" => (string)$response->ECommerceOrder_ID,
+                    "check_id" => (string)$response->Check_ID,
+                    "check_number" => (string)$response->CheckNumber
+                ));
+
                 $this->response->redirect($this->url->link('checkout/success', '', true));
-            } elseif(isset($result_array["ResultDescription"])) {
-                //An error occurred but we did parse it so it's a valid error
-                $this->session->data['error'] = $result_array['ResultDescription'];
-                $this->response->redirect($this->url->link('checkout/cart', '', true));
-            } else{
-                // completely unknown problem. WTF mate
-                error_log("[GreenPay] Error occurred while attempting to decode and read result of call to create check. Raw response: " & $result);
-                $this->session->data['error'] = "An unknown error occurred while attempting to retrieve response from payment provider. Please try again later.";
-                $this->response->redirect($this->url->link('checkout/cart', '', true));
+            } else {
+                //Code was non-zero meaning something occurred. Display the ResultDescription
+                error_log("[GreenPay] Error occurred during call to create check. Raw response: " . print_r($response, true));
+                $this->session->data["error"] = "GreenPay Payment Error: " . (string)$response->Result->ResultDescription;
+                $this->response->redirect($this->url->link('checkout/checkout', '', true));
             }
-        } catch(Exception $e) {
-            curl_close($ch);
-            // Redirect to the cart and display error
-            $this->session->data['error'] = $this->language->get('error_something_wrong');
-            $this->response->redirect($this->url->link('checkout/cart', '', true));
-        } finally {
-            curl_close($ch);
         }
     }
 
-	/**
-     * This function should be called by a CRON Job on a regular basis. If we can get rid of this in favor of using real push updates, we absolutely should.
+    /**
+     * Make a call to the Green API with the given data
+     * 
+     * @param string $method            The method at the API endpoint to be called
+     * @param mixed $data               Either string or array. If given, will be added as a CURLOPT_POSTFIELDS to the request
+     * 
+     * @return SimpleXMLElement|null    The XML object returned by the API read into an array by simplexml library or null on error
      */
-	public function method_cron(){
-		// Load Model
-        $this->load->model('extension/payment/greenpay');
-		$this->load->model('checkout/order');
+    private function postGreenAPI($method, $data){
+        //DEBUG echo "<pre>";
+        //DEBUG echo "Calling API: \r\n";
+        //DEBUG echo "Endpoint: " . GREENPAY_ENDPOINT . $method . "\r\n";
+        //DEBUG print_r($data);
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, GREENPAY_ENDPOINT . $method);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        
+        if(isset($data)){
+            $params = array();
+            foreach($data as $key => $value){
+                 $params[] = $key . "=" . urlencode($value);
+            }
+            //DEBUG echo "Query: " . implode("&", $params) . "\r\n";
 
-		$greenpayOrders = $this->model_extension_payment_greenpay->get_all_greenpay_order();
-		if( $greenpayOrders ){
-            $greenConfig = $this->getGreenmoneyConfig();
-			foreach($greenpayOrders as $order){
-                $order_id = $order['order_id'];
-                
-                $status = array(
-                    "Client_ID" => $greenConfig['greenpay_client_id'],
-                    "APIPassword" => $greenConfig['greenpay_api_password'],
-                    "Check_ID" => $order['check_id']
-                );
+            curl_setopt($ch, CURLOPT_POSTFIELDS, implode("&", $params));
+        }
 
-				// Curl Hit to generate check
-				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, $greenConfig['greenpay_payment_mode'] . '/CartCheckStatus');
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-				curl_setopt($ch, CURLOPT_POST, 1);
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $status);
-				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-				$result = curl_exec($ch);
-				curl_close($ch);
+        $response = null;
+        try {
+            $result = curl_exec($ch);
+            //DEBUG echo "Raw: " . $result. "\r\n";
+            $response = @simplexml_load_string($result); //@ specifies to ignore warnings thrown by this attempt to load the XML into an object
+            //DEBUG print_r($response);
+        } catch(Exception $e) {
+            // Redirect to the cart and display error
+            $this->lastAPIError = $e->getMessage();
+        } finally {
+            curl_close($ch);
+        }
 
-				$xml = @simplexml_load_string($result);
-				$json = json_encode($xml);
-				$result_array = json_decode($json, TRUE);
-				$error_msg = "";
-				if(isset($result_array['Result']) && $result_array['Result'] == 0 ){
-					if(isset($result_array['VerifyResult']) && $result_array['VerifyResult'] == 0){
-						// Update Order status to completed : 5
-						$this->model_checkout_order->addOrderHistory($order['order_id'], 5, @$result_array['VerifyResultDescription']);
-					}
-				}
-			}
-		}
-	}
+        //DEBUG echo "</pre>";
+        return $response;
+    }
 }
