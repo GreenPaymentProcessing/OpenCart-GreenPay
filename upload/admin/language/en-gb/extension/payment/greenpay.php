@@ -35,7 +35,7 @@ $_['tab_config'] = 'CONFIGURATION';
 $_['error_permission'] = 'You do not have permission to modify the configuration!';
 $_['error_no_method'] = 'GreenPay Gateway is not enabled!';
 $_['error_failed_save'] = 'GreenPay failed to save your store configuration. Please double check your information and try again.';
-$_['error_test_mode'] = 'You are in test mode! <a id="config_link" class="alert-link" href="#">Go live when you are ready!</a>';
+$_['error_test_mode'] = 'You are in test mode! <strong>Go live when you are ready!</strong>';
 $_['error_success'] = 'Your configuration is good. Ready to receive some payments!';
 $_['error_api'] = 'Green API credentials are invalid. Please double check your Green API credentials and try again.';
 $_['error_api_oc'] = "Green was unable to contact your store's API using the specified key. Please make sure you have whitelisted Green's IP address and that you have copied the key correctly.";
