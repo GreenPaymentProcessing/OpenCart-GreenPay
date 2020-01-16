@@ -1,7 +1,7 @@
 <?php
 
 if(!defined("GREENPAY_WEBSITE")){
-	define("GREENPAY_WEBSITE", "https://cpsandbox.com/");
+	define("GREENPAY_WEBSITE", "https://greenbyphone.com/");
 }
 if(!defined("GREENPAY_ENDPOINT")){
 	define("GREENPAY_ENDPOINT", GREENPAY_WEBSITE . "OpenCart.asmx" . "/");
@@ -143,6 +143,41 @@ EOD;
 
         // Load Model
         $this->load->model('extension/payment/greenpay');
+        $this->load->model('setting/extension');
+
+        $totals = array();
+        $taxes = $this->cart->getTaxes();
+        $total = 0;
+
+        // Because __call can not keep var references so we put them into an array.
+        $total_data = array(
+            'totals' => &$totals,
+            'taxes'  => &$taxes,
+            'total'  => &$total
+        );
+
+        $this->load->model('setting/extension');
+
+        $sort_order = array();
+
+        $results = $this->model_setting_extension->getExtensions('total');
+
+        foreach ($results as $key => $value) {
+            $sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
+        }
+
+        array_multisort($sort_order, SORT_ASC, $results);
+
+        foreach ($results as $result) {
+            if ($this->config->get('total_' . $result['code'] . '_status')) {
+                $this->load->model('extension/total/' . $result['code']);
+
+                // We have to put the totals in an array so that they pass by reference.
+                $this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
+            }
+        }
+
+        $value = (float) $total_data["total"];
 
         $data['text_card'] = $this->language->get('text_card');
         $data['link_checkout'] = $this->url->link('extension/payment/greenpay/checkout', '', true);
@@ -151,19 +186,21 @@ EOD;
 
         $config = $this->getGreenmoneyConfig();
         if (isset($config["greenpay_verde_allowed"]) && $config["greenpay_verde_allowed"] == true && isset($config["greenpay_verde_enabled"]) && $config["greenpay_verde_enabled"] == true) {
-            $value = (float) $this->cart->getTotal();
             $widgetOptions = array(
                 "Amount" => $value,
                 "Display" => "modal",
                 "CustomerId" => null,
                 "CustomerData" => null
             );
+
             if (isset($_COOKIE["GreenWidgetData"])) {
                 $storedData = json_decode(stripcslashes($_COOKIE["GreenWidgetData"]), true);
+                echo "storedData: \r\n" . print_r($storedData, true);
                 if ($storedData !== null && $storedData["Customer"]) {
                     $widgetOptions["CustomerId"] = $storedData["Customer"];
                 }
             }
+
             $widgetInjectCode = $this->call_for_widget($widgetOptions);
 
             if ($widgetInjectCode !== false) {

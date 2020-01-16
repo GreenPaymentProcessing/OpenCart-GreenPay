@@ -1,7 +1,7 @@
 <?php
 
 if(!defined("GREENPAY_WEBSITE")){
-	define("GREENPAY_WEBSITE", "https://cpsandbox.com/");
+	define("GREENPAY_WEBSITE", "https://greenbyphone.com/");
 }
 if(!defined("GREENPAY_ENDPOINT")){
 	define("GREENPAY_ENDPOINT", GREENPAY_WEBSITE . "OpenCart.asmx" . "/");
