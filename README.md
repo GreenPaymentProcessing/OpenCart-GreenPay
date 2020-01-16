@@ -34,7 +34,7 @@ $allowed = array(
 );
 ```
 
-This defines what sections OpenCart Extensions are allowed to write to. We need to add one so change that section to: 
+This defines what sections OpenCart Extensions are allowed to write to. We need to add one, so change that whole section to this: 
 
 ```php
 // A list of allowed directories to be written to
@@ -58,7 +58,7 @@ $allowed = array(
 );
 ```
 
-So note that we added `catalog/controller/api/` as a path in the middle there. Once you're done with that, save the changes to this file and, if you're editing via FTP make sure to upload the file back. If you're editing on the server directly through SSH then just save the file and the changes should take effect immediately and you can move onto the installation.
+We added `catalog/controller/api/` as a path in the middle there. Once you're done with that, save the changes to this file and, if you're editing via FTP make sure to upload the file back. If you're editing on the server directly through SSH then just save the file and the changes should take effect immediately and you can move onto the installation.
 
 ## Installation via FTP
 Clone or download this repository. Use your favorite FTP client to connect to your server and navigate to your OpenCart's root directory. From there, copy all the files inside the `upload` folder into that root directory. Do not copy the `upload` folder itself, just the folders and files inside it.
@@ -83,3 +83,21 @@ After you have uploaded the files, you can find the GreenPay configuration setti
 - OpenCart API Key: The value we copied down earlier from `API Key`
 
 \*Note that in Test mode, your Client ID and API Password are a separate pair of credentials than in Live mode. If you are receiving errors about your credentials being incorrect, it may be because you have the wrong credentials for the selected mode. If you are unsure which credentials you have, please contact support at support@green.money
+
+### Configuration Errors and Warnings
+A few potential errors could display during the process of saving your configuration. Your store is not ready to receive or test payments at checkout until you receive a success message so we'll need to resolve those before you can move forward.
+
+#### Please check the form fields for errors and try to save again. All fields are required for the plugin to function
+This one is pretty simple! You just missed a field. All of the fields are required so they must be filled out.
+
+#### GreenPay Gateway is not enabled
+This just notes that the gateway has been set to disabled which means you won't be able to take payments during checkout. To resolve this, make sure you check the box next to Enabled before saving!
+
+#### You are in test mode! Go live when you are ready
+As explained above, when in Test mode, no payments will actually be generated in Green. Instead, the plugin and API simply emulate the process of making the check including changing the order status and adding notes. This can be useful but make sure to change this to live when you're ready. 
+
+#### Green API credentials are invalid. Please double check your Green API credentials and try again.
+The Green API credentials you used didn't validate with our API. It's most likely that you are using the incorrect credentials or miscopied them! Make sure you have them absolutely correct and, if you need to, you can generate new ones in your Green Portal by logging in and navigating to My Account > API. 
+
+#### Green was unable to contact your store's API using the specified key. Please make sure you have whitelisted Green's IP address and that you have copied the key correctly.
+Your Green API credentials validated, but our server was unable to reach out to your store using the Opencart API Username and Key you specified. So first step will be to verify you have those correctly copied! If you correct that and still receive the error, it could caused by a file not being correctly copied during the installation process of the extension. Before we installed the plugin, we had to correct a file to make sure we could upload to the API folder. We would recommend going back to that step and making sure it was correctly configured. If necessary, you may need to remove the extension and reinstall it and then attempt again. 

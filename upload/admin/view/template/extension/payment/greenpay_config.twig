@@ -8,22 +8,52 @@
             <div class="form-group row">
                 <label class="control-label col-sm-2">{{ text_enabled }}</label>
                 <div class="col-sm-10" style="padding-top:9px;">
-                    <input type="checkbox" name="greenpay_status" id="greenpay_status" value="1" {{ greenpay_status ? 'checked' : '' }} />
+                    <input type="checkbox" name="greenpay_status" id="greenpay_status" value="true" {{ greenpay_status ? 'checked' : '' }} />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="control-label col-sm-2">{{ text_domain }}</label>
+                <div class="col-sm-10">
+                    <input type="text" name="greenpay_domain" id="greenpay_domain" class="form-control" value="{{ greenpay_domain }}" placeholder="www.example.com" />
+                    <small class="text-muted">The web address to your OpenCart store. If your store is on a subdomain, please include the subdomain like "example.com/opencart". Please include the <code>https://</code></small>
                 </div>
             </div>
             <div class="form-group row">
                 <label class="col-sm-2 control-label">{{ payment_mode }}</label>
                 <div class="col-sm-10">
                     <select name="greenpay_payment_mode" id="greenpay_payment_mode" class="form-control">
-                        <option value="https://cpsandbox.com/OpenCart.asmx"
-                            {% if greenpay_payment_mode == 'https://cpsandbox.com/OpenCart.asmx' %} 
+                        <option value="false"
+                            {% if greenpay_payment_mode == 'false' %} 
                                 selected
                             {% endif %}>{{ text_extension_sandbox }}</option>
-                        <option value="https://greenbyphone.com/OpenCart.asmx"
-                            {% if greenpay_payment_mode == 'https://greenbyphone.com/OpenCart.asmx' %} 
+                        <option value="true"
+                            {% if greenpay_payment_mode == 'true' %} 
                                 selected
                             {% endif %}>{{ text_extension_live }}</option>
                     </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 control-label">{{ verification_mode }}</label>
+                <div class="col-sm-10">
+                    <select name="greenpay_verification_mode" id="greenpay_verification_mode" class="form-control">
+                        <option value="0"
+                            {% if greenpay_verification_mode == '0' %} 
+                                selected
+                            {% endif %}>{{ text_verification_legacy }}</option>
+                        <option value="1"
+                            {% if greenpay_verification_mode == '1' %} 
+                                selected
+                            {% endif %}>{{ text_verification_permissive }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="control-label col-sm-2">Debug Mode</label>
+                <div class="col-sm-10" style="padding-top:9px;">
+                    <input type="checkbox" name="greenpay_debug" id="greenpay_debug" value="true" {{ greenpay_debug ? 'checked' : '' }} />
+                    <small class="text-muted">When this is active, the GreenPay extension will output extra information about API service calls and functionality to the PHP error logs. 
+                        This should NOT be turned on in production environments unless you are troubleshooting an issue or have been directed to do so by a Green representative.</small>
                 </div>
             </div>
         </div>
@@ -32,7 +62,7 @@
         </div>
         <div class="form-wrapper">
             <div class="form-group row">
-                <label class="control-label col-sm-2">{{ text_login }}*</label>
+                <label class="control-label col-sm-2">{{ text_login }}</label>
                 <div class="col-sm-10">
                     <div class="input-group">
                         <span class="input-group-addon">
@@ -44,7 +74,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label class="control-label col-sm-2">{{ text_password }}*</label>
+                <label class="control-label col-sm-2">{{ text_password }}</label>
                 <div class="col-sm-10">
                     <div class="input-group fixed-width-lg">
                         <span class="input-group-addon">
@@ -60,7 +90,19 @@
         </div>
         <div class="form-wrapper">
             <div class="form-group row">
-                <label class="control-label col-sm-2">{{ text_oc_label }}*</label>
+                <label class="control-label col-sm-2">{{ text_oc_userlabel }}</label>
+                <div class="col-sm-10">
+                    <div class="input-group fixed-width-lg">
+                        <span class="input-group-addon">
+                            <i class="fa fa-key"></i>
+                        </span>
+                        <input type="text" name="greenpay_oc_username" class="form-control" value="{{ greenpay_oc_username }}"/>
+                    </div>
+                    <small class='text-muted'>The "username" of the API key created. This is usually just "Default" as that is the standard key for OpenCart.</small> 
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="control-label col-sm-2">{{ text_oc_label }}</label>
                 <div class="col-sm-10">
                     <div class="input-group fixed-width-lg">
                         <span class="input-group-addon">
@@ -71,5 +113,6 @@
                 </div>
             </div>
         </div>
+        {{ verde }}
     </div>
 </div>
