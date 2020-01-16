@@ -1,6 +1,15 @@
 <?php
-define('GREENPAY_VERSION', '2.0.0');
-define("GREENPAY_ENDPOINT", "https://cpsandbox.com/OpenCart.asmx/");
+
+if(!defined("GREENPAY_WEBSITE")){
+	define("GREENPAY_WEBSITE", "https://cpsandbox.com/");
+}
+if(!defined("GREENPAY_ENDPOINT")){
+	define("GREENPAY_ENDPOINT", GREENPAY_WEBSITE . "OpenCart.asmx" . "/");
+}
+
+if(!defined("GREENPAY_VERSION")){
+	define("GREENPAY_VERSION", '2.0.0');
+}
 
 class ControllerExtensionPaymentGreenPay extends Controller {
     private $variables = array();
@@ -25,7 +34,6 @@ class ControllerExtensionPaymentGreenPay extends Controller {
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validate()) {
             // Edit settings
             $this->request->post[$this->prefix() . 'greenpay_saved'] = false;
-            $this->model_setting_setting->editSetting($this->prefix() . 'greenpay', $this->request->post);
            
             //Check for Green API credentials and OpenCart store validation 
             $storeId = $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_store_id');
@@ -33,46 +41,45 @@ class ControllerExtensionPaymentGreenPay extends Controller {
                 $storeId = 0;
             }
 
-            $enabled = $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_status');
+            $enabled =  $this->request->post[$this->prefix() . 'greenpay_status'];
             if($enabled == null || strlen($enabled) == 0){
                 $enabled = "false";
             } else {
                 $enabled = "true";
             }
 
-
             $data = $this->postGreenAPI('RegisterStore', array(
-                "Client_ID" => $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_client_id'),
-                "ApiPassword" => $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_api_password'),
+                "Client_ID" =>  $this->request->post[$this->prefix() . 'greenpay_client_id'],
+                "ApiPassword" =>  $this->request->post[$this->prefix() . 'greenpay_api_password'],
                 "StoreID" => $storeId,
-                "OCUsername" => $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_oc_username'),
-                "OCKey" => $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_oc_key'),
-                "Domain" => $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_domain'),
+                "OCUsername" =>  $this->request->post[$this->prefix() . 'greenpay_oc_username'],
+                "OCKey" =>  $this->request->post[$this->prefix() . 'greenpay_oc_key'],
+                "Domain" =>  $this->request->post[$this->prefix() . 'greenpay_domain'],
                 "Enabled" => $enabled,
-                "PaymentMode" => $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_payment_mode'),
-                "VerificationMode" => $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_verification_mode'),
+                "PaymentMode" =>  $this->request->post[$this->prefix() . 'greenpay_payment_mode'],
+                "VerificationMode" =>  $this->request->post[$this->prefix() . 'greenpay_verification_mode'],
                 "PluginVersion" => GREENPAY_VERSION
-            ));
- 
-            //DEBUG echo "TYPE ==== " . gettype($data) . "<br/><br/><br/>";
-            //DEBUG echo "IS SimpleXMLElement ==== " . ($data instanceof SimpleXMLElement) . "<br/><br/><br/>";
-            if($data == null || !($data instanceof SimpleXMLElement) || $data->CredentialResult->Result != "0"){
+            ), $this->request->post[$this->prefix() . 'greenpay_debug']);
+
+            if($data == null || !($data instanceof SimpleXMLElement) || (string)$data->CredentialResult->Result != "0"){
                 $this->variables["green_api_error"] = true;
                 $this->variables['failedSave'] = true;
             }
             
-            if($data == null || !($data instanceof SimpleXMLElement) || $data->OpenCartResult->Result != "0"){
+            if($data == null || !($data instanceof SimpleXMLElement) || (string)$data->OpenCartResult->Result != "0"){
                 $this->variables["oc_api_error"] = true;
                 $this->variables['failedSave'] = true;
             }
 
-            if($data != null && $data instanceof SimpleXMLElement && $data->StoreConfigurationID != "0"){
+            if($data != null && $data instanceof SimpleXMLElement && (int)$data->StoreConfigurationID != 0){
                 //We received a store ID back which means our API was able to store this information. Let's save that store ID in our configuration
-                $this->request->post[$this->prefix() . 'greenpay_store_id'] = $data->StoreConfigurationID;
+                $this->request->post[$this->prefix() . 'greenpay_store_id'] = (int)$data->StoreConfigurationID;
                 $this->request->post[$this->prefix() . 'greenpay_saved'] = true;
+                $this->request->post[$this->prefix() . 'greenpay_verde_allowed'] = (boolean)$data->VerdeCapable;
                 $this->variables['success'] = true;
-                $this->model_setting_setting->editSetting($this->prefix() . 'greenpay', $this->request->post);
             }
+
+            $this->model_setting_setting->editSetting($this->prefix() . 'greenpay', $this->request->post);
         }
 
         // Load default layout
@@ -101,6 +108,9 @@ class ControllerExtensionPaymentGreenPay extends Controller {
         $this->variables['greenpay_status'] = $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_status');
         $this->variables['greenpay_saved'] = $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_saved');
         $this->variables['greenpay_verification_mode'] = $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_verification_mode');
+        $this->variables['greenpay_verde_allowed'] = $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_verde_allowed');
+        $this->variables['greenpay_verde_enabled'] = $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_verde_enabled');
+        $this->variables['greenpay_debug'] = $this->model_setting_setting->getSettingValue($this->prefix() . 'greenpay_debug');
 
         // Alerts
         $this->variables['no_permission'] = false;
@@ -114,6 +124,10 @@ class ControllerExtensionPaymentGreenPay extends Controller {
 
         // Load tabs
         // Configuration
+        $this->variables['verde'] = "";
+        if($this->variables['greenpay_verde_allowed']){
+            $this->variables["verde"] = $this->load->view('extension/payment/greenpay_config_verde', $this->variables);
+        }
         $this->variables['config'] = $this->load->view('extension/payment/greenpay_config', $this->variables);
 
         $this->response->setOutput($this->load->view('extension/payment/greenpay', $this->variables));
@@ -152,7 +166,7 @@ class ControllerExtensionPaymentGreenPay extends Controller {
             unset($this->request->post[$key]);
             $this->request->post[$this->prefix() . $key] = $value; //concatinate your existing array with new one
         }
-		//DEBUG echo '<pre>';print_r($this->variables);
+        
         return !$error; // If no error => validated
     }
 
@@ -161,15 +175,16 @@ class ControllerExtensionPaymentGreenPay extends Controller {
      * 
      * @param string $method            The method at the API endpoint to be called
      * @param mixed $data               Either string or array. If given, will be added as a CURLOPT_POSTFIELDS to the request
+     * @param bool $debug               Whether we should output the call info to the error log
      * 
      * @return SimpleXMLElement|null    The XML object returned by the API read into an array by simplexml library or null on error
      */
-    private function postGreenAPI($method, $data){
-        //DEBUG echo "<pre>";
-        //DEBUG echo "Calling API: \r\n";
-        //DEBUG echo "Endpoint: " . GREENPAY_ENDPOINT . $method . "\r\n";
-        //DEBUG print_r($data);
-        
+    private function postGreenAPI($method, $data, $debug = false){
+        if($debug == true){
+            error_log("[GreenPay] Beginning API call to " . GREENPAY_ENDPOINT . $method );
+            error_log("[GreenPay] Raw data being sent: \r\n" . print_r($data, true));
+        }
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, GREENPAY_ENDPOINT . $method);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -181,7 +196,10 @@ class ControllerExtensionPaymentGreenPay extends Controller {
             foreach($data as $key => $value){
                  $params[] = $key . "=" . urlencode($value);
             }
-            //DEBUG echo "Query: " . implode("&", $params) . "\r\n";
+
+            if($debug == true){
+                error_log("[GreenPay] Query string: " . implode("&", $params));
+            }
 
             curl_setopt($ch, CURLOPT_POSTFIELDS, implode("&", $params));
         }
@@ -189,17 +207,20 @@ class ControllerExtensionPaymentGreenPay extends Controller {
         $response = null;
         try {
             $result = curl_exec($ch);
-            //DEBUG echo "Raw: " . $result. "\r\n";
             $response = @simplexml_load_string($result); //@ specifies to ignore warnings thrown by this attempt to load the XML into an object
-            //DEBUG print_r($response);
+
+            if($debug == true){
+                error_log("[GreenPay] Raw response from API: \r\n" . $result );
+                error_log("[GreenPay] Decoded response from API: \r\n" . print_r($response, true));
+            }
         } catch(Exception $e) {
             // Redirect to the cart and display error
+            error_log("[GreenPay] Exception occurered while attempting to decode response from API call: " . $e->getMessage());
             $this->lastAPIError = $e->getMessage();
         } finally {
             curl_close($ch);
         }
 
-        //DEBUG echo "</pre>";
         return $response;
     }
 

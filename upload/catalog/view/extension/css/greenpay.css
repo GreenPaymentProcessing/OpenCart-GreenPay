@@ -1,0 +1,250 @@
+#bill-pay-container {
+    transition: .25s;
+}
+
+input[type='radio'] {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
+
+.icon-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+}
+
+input[type='radio']:checked + label > .icon-container > .customer-option {
+    border: 2px solid #a0d6f6;
+    color: #666;
+    background-color: #e6f3f7;
+    transition: .2s;
+}
+
+    input[type='radio']:checked + label > .icon-container > .customer-option > .fa-check-circle {
+        visibility: visible;
+        color: var(--blue);
+    }
+
+.icon-container > .warning {
+    font-size: calc(10px + .25vw);
+    color: var(--danger);
+    text-align: center;
+    visibility: hidden;
+    opacity: 0;
+}
+
+input[type='radio']:checked + label > .icon-container > .warning {
+    visibility: visible;
+    opacity: 1;
+    transition: .2s;
+}
+
+.single-bank-info {
+    width: 100%;
+    font-weight: lighter;
+    background-color: #f8f8f8;
+    border-radius: 5px;
+    padding: .5em;
+    display: flex;
+    align-items: center;
+    font-size: calc(14px + .3vw);
+    cursor: pointer;
+    background-color: #fff;
+    box-shadow: 1px 1px 4px rgba(210,210,210,.6);
+    border: solid 1px #ced4da;
+}
+
+.bank-option > .warning {
+    font-size: 14px;
+}
+
+input[type='radio']:checked + label > .single-bank-info {
+    background-color: #e6f3f7;
+    border: 2px solid #a0d6f6;
+}
+
+li.gm_payment_account {
+    padding: 0.55em;
+    background: rgb(224,224,224);
+    background: linear-gradient(180deg, rgba(241,241,241,1) 0%, rgba(210,210,210,1) 100%);
+    margin: 5px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 1px 1px 2px #cacaca;
+    border: 1px solid #d0d0d0;
+}
+
+    li.gm_payment_account:not(.selected):hover {
+        border: 1px solid #a0d6f6;
+        box-shadow: 1px 1px 6px #cacaca;
+    }
+
+    li.gm_payment_account.selected {
+        border: 2px solid #a0d6f6;
+    }
+
+span.chosen {
+    width: 30px;
+    font-size: 1.25em;
+    line-height: 1.25em;
+}
+
+span.account_institution {
+    flex-grow: 1;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: lighter;
+}
+
+span.account_number {
+    padding-right: 20px;
+}
+
+span.account_nickname {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-right: 20px;
+    font-weight: lighter;
+}
+
+
+@media (min-width: 320px) and (max-width: 600px) {
+    .customer-list > table > tbody {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .icon-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+    }
+
+    .icon-container > .warning {
+        font-size: 12px;
+    }
+
+    .customer-option > .fa-check-circle {
+        border-radius: 50%;
+        background-color: #fff;
+        visibility: hidden;
+        position: absolute;
+        font-size: 21px;
+        top: calc(30% + 10.5px);
+        right: -10.5px;
+    }
+
+    .customer-list > table > tbody > tr > td {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .bill-pay-type > table > tbody {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .bill-pay-type > table > tbody > tr > td {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: stretch;
+    }
+
+    .icon-container > .billpay-mode {
+        position: relative;
+        width: 100%;
+        height: 75%;
+    }
+
+        .icon-container > .billpay-mode > .fa-check-circle {
+            top: calc(25% + 10.5px);
+            right: -10.5px;
+            font-size: 21px;
+        }
+}
+
+
+.billpay-mode {
+    position: relative;
+    background-color: #f8f8f8;
+    font-size: calc(12px + .1vw);
+    color: #666;
+    border-radius: 5px;
+    font-weight: lighter;
+    text-align: center;
+    width: calc(160px + 6vw);
+    min-height: calc(120px + 5vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: solid 1px #ced4da;
+    padding: 1em;
+}
+
+    .billpay-mode:hover {
+        border: 1px solid #a0d6f6;
+    }
+
+    .billpay-mode > .fa-check-circle {
+        border-radius: 50%;
+        background-color: #fff;
+        visibility: hidden;
+        position: absolute;
+        font-size: 26px;
+        top: -13px;
+        right: -13px;
+    }
+
+input[type='radio']:checked + label > .icon-container > .billpay-mode {
+    border: 2px solid #a0d6f6;
+    color: #666;
+    background-color: #e6f3f7;
+    transition: .2s;
+}
+
+    input[type='radio']:checked + label > .icon-container > .billpay-mode > .fa-check-circle {
+        visibility: visible;
+        color: var(--blue);
+    }
+
+
+.bill-pay-type > table {
+    width: 100%;
+}
+
+    .bill-pay-type > table > tbody {
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+
+.bill-pay-type {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+input[type='radio']:disabled + label,
+input[type='radio']:disabled + label .billpay-mode,
+input[type='radio']:disabled + label .billpay-mode:hover {
+    color: #bbb;
+    border: 0px;
+}

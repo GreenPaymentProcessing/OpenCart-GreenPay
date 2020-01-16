@@ -1,4 +1,12 @@
 <?php
+
+if(!defined("GREENPAY_WEBSITE")){
+	define("GREENPAY_WEBSITE", "https://cpsandbox.com/");
+}
+if(!defined("GREENPAY_ENDPOINT")){
+	define("GREENPAY_ENDPOINT", GREENPAY_WEBSITE . "OpenCart.asmx" . "/");
+}
+
 class ModelExtensionPaymentGreenPay extends Model
 {
     private function prefix() {
@@ -135,4 +143,52 @@ class ModelExtensionPaymentGreenPay extends Model
 		return $query->rows;
 		//return $this->db->query("SELECT * FROM `" . DB_PREFIX . "greenpay_payment` a INNER JOIN `" . DB_PREFIX . "order` b ON a.order_id = b.order_id WHERE b.`order_status_id` = ". (int)$order_status_id)->rows;
 	}
+
+	/**
+     * Function will make an API call to our API that will register the session in our server
+     * 
+     * @return boolean True   If the call was made
+     */
+    public function start_session($clientId, $sessionId)
+    {
+
+        $options = array(
+            "s" => $sessionId,
+            "c" => $clientId
+        );
+
+		$debug = $this->config->get($this->prefix() . 'greenpay_debug');
+        if($debug){
+            error_log("[GreenPay] Beginning call to StartSession with data: \r\n" . print_r($options, true));
+        }
+
+        try {
+            $ch = curl_init();
+
+            if ($ch === FALSE) {
+                throw new \Exception('Failed to initialize cURL');
+            }
+            
+            $data_string = json_encode($options);
+            curl_setopt_array($ch, array(
+                CURLOPT_URL => GREENPAY_WEBSITE . "/FTFTokenizer.asmx/StartSession",
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json',
+                    'Content-Length: ' . strlen($data_string)
+                ),
+                CURLOPT_CONNECTTIMEOUT => 3,
+                CURLOPT_POSTFIELDS => $data_string
+            ));
+            $response = curl_exec($ch);
+            curl_close($ch);
+            return true;
+        } catch (\Exception $e) {
+            if($debug){
+                error_log("[GreenPay] Exception occurred: " . $e->getMessage());
+            }
+            return false;
+        }
+    }
 }
