@@ -1,7 +1,7 @@
-# OpenCart-GreenPay
-GreenPay gateway plugin for OpenCart eCommerce system
+# GreenPay
+The GreenPay™ Extension for OpenCart was developed to add an eCheck payment option to OpenCart stores and allow merchants to take bank account payments from their customers using their Green Merchant Account. 
 
-WARNING: This repository and plugin are currently under development and are not tested in production environments. Usage of this plugin is done at your own risk!
+The extension's latest version, 2.0.0, was developed on the latest version of OpenCart which is currently 3.0.3.2. Green Payment Processing makes no guarantees that this plugin will function as intended in all server environments or other versions of OpenCart so usage of the plugin is granted at your own risk. If you notice any bugs, feel free to reach out to us at support@green.money. 
 
 ## Prerequisites
 1. Your server must have OpenCart version 3.x or greater installed. 
