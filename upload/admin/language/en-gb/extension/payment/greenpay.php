@@ -38,7 +38,7 @@ $_['error_failed_save'] = 'GreenPay failed to save your store configuration. Ple
 $_['error_test_mode'] = 'You are in test mode! <strong>Go live when you are ready!</strong>';
 $_['error_success'] = 'Your configuration is good. Ready to receive some payments!';
 $_['error_api'] = 'Green API credentials are invalid. Please double check your Green API credentials and try again.';
-$_['error_api_oc'] = "Green was unable to contact your store's API using the specified key. Please make sure you have whitelisted Green's IP address and that you have copied the key correctly.";
+$_['error_api_oc'] = "Green was unable to contact your store's API using the specified key.";
 $_['error_form_required'] = 'Please check the form fields for errors and try to save again. All fields are required for the plugin to function';
 $_['error_custom_env'] = 'Leave empty if you don\'t have a custom GreenPay environment';
 
