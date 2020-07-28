@@ -19,21 +19,6 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label class="col-sm-2 control-label">{{ payment_mode }}</label>
-                <div class="col-sm-10">
-                    <select name="greenpay_payment_mode" id="greenpay_payment_mode" class="form-control">
-                        <option value="false"
-                            {% if greenpay_payment_mode == 'false' %} 
-                                selected
-                            {% endif %}>{{ text_extension_sandbox }}</option>
-                        <option value="true"
-                            {% if greenpay_payment_mode == 'true' %} 
-                                selected
-                            {% endif %}>{{ text_extension_live }}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group row">
                 <label class="col-sm-2 control-label">{{ verification_mode }}</label>
                 <div class="col-sm-10">
                     <select name="greenpay_verification_mode" id="greenpay_verification_mode" class="form-control">
@@ -110,6 +95,27 @@
                         </span>
                         <input type="text" name="greenpay_oc_key" class="form-control" value="{{ greenpay_oc_key }}"/>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-heading">
+            <i class='fa fa-cog'></i> Advanced
+        </div>
+        <div class="form-wrapper">
+            <div class="form-group row">
+                <label class="col-sm-2 control-label">{{ payment_mode }}</label>
+                <div class="col-sm-10">
+                    <select name="greenpay_payment_mode" id="greenpay_payment_mode" class="form-control">
+                        <option value="false"
+                            {% if greenpay_payment_mode == 'false' %} 
+                                selected
+                            {% endif %}>{{ text_extension_sandbox }}</option>
+                        <option value="true"
+                            {% if greenpay_payment_mode == 'true' %} 
+                                selected
+                            {% endif %}>{{ text_extension_live }}</option>
+                    </select>
+                    <p><small>Do NOT modify this unless directed by a Green IT Support representative. Even when using Test Credentials generated through your Portal, requests should still be in Live mode!</small></p>
                 </div>
             </div>
         </div>
